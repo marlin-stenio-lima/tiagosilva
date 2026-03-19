@@ -1,0 +1,319 @@
+.dashboard-container {
+  display: flex;
+  background-color: var(--bg-dark);
+  min-height: 100vh;
+}
+
+.dashboard-content {
+  flex: 1;
+  margin-left: 300px;
+  padding: var(--spacing-lg) var(--spacing-xl);
+}
+
+.content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-xl);
+}
+
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.breadcrumbs .current {
+  color: var(--accent-blue);
+  font-weight: 500;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+}
+
+.welcome-text {
+  font-size: 1rem;
+  color: var(--text-primary);
+}
+
+.welcome-text strong {
+  color: #fff;
+}
+
+.notification-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.notification-btn:hover {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+  border-color: rgba(59, 130, 246, 0.2);
+}
+
+.notification-dot {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 8px;
+  height: 8px;
+  background: #3b82f6;
+  border-radius: 50%;
+  border: 2px solid #020305;
+}
+
+.progress-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 3rem;
+  border-radius: 30px;
+  margin-bottom: var(--spacing-xl);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+}
+
+.progress-info h2 {
+  font-size: 2rem;
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+
+.progress-info p {
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-lg);
+}
+
+.progress-bar-container {
+  width: 500px;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.card-gradient {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(15, 18, 25, 0.8) 100%);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+.card-gradient::before {
+  content: '';
+  position: absolute;
+  top: -50%; right: -20%; width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 60%);
+  filter: blur(30px);
+  pointer-events: none;
+}
+
+.progress-bar {
+  height: 100%;
+  background: #3b82f6;
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+}
+
+.progress-stats {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.progress-stats .percentage {
+  font-size: 3rem;
+  font-weight: 700;
+  line-height: 1;
+  color: #3b82f6;
+  text-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+}
+
+.progress-stats .label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  letter-spacing: 0.1em;
+}
+
+.shortcuts-section, .featured-section {
+  margin-bottom: var(--spacing-xl);
+}
+
+.shortcuts-section h3, .section-header h3 {
+  font-size: 1.25rem;
+  margin-bottom: var(--spacing-md);
+  position: relative;
+  padding-left: 15px;
+}
+
+.shortcuts-section h3::before, .section-header h3::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 3px;
+  background: var(--accent-blue);
+  box-shadow: 0 0 10px var(--accent-blue);
+}
+
+.shortcut-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-md);
+}
+
+.shortcut-card {
+  padding: var(--spacing-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  background: rgba(20, 24, 32, 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.shortcut-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(59, 130, 246, 0.5);
+  background: rgba(30, 36, 48, 0.8);
+  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.15);
+}
+
+.shortcut-card .icon {
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+}
+
+.icon {
+  width: 48px;
+  height: 48px;
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon.blue-vibe {
+  color: var(--accent-blue);
+  background: rgba(30, 105, 255, 0.1);
+}
+
+.card-content h4 {
+  color: #fff;
+}
+
+.shortcut-card h4 {
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+
+.shortcut-card p {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: var(--spacing-md);
+}
+
+.view-all {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--accent-blue);
+  letter-spacing: 0.05em;
+}
+
+.tool-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-md);
+}
+
+.tool-card {
+  padding: var(--spacing-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+  background: rgba(20, 24, 32, 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.tool-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(139, 92, 246, 0.5);
+  box-shadow: 0 10px 30px rgba(139, 92, 246, 0.15);
+}
+
+.tool-visual img {
+  width: 60px;
+  height: 60px;
+  border-radius: 15px;
+  background: var(--bg-card-alt);
+  padding: 10px;
+}
+
+.tool-info h4 {
+  font-size: 1.1rem;
+  margin-bottom: 4px;
+}
+
+.tool-info p {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.tool-tag {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+
+.tool-tag.tag-blue { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+.tool-tag.tag-cyan { background: rgba(255, 255, 255, 0.05); color: #a1a1aa; }
+
+.tool-action {
+  color: #666;
+  background: transparent;
+  border: 1px solid transparent;
+}
+
+.tool-card:hover .tool-action {
+  color: #3b82f6;
+}
+
+@media (max-width: 1200px) {
+  .shortcut-grid, .tool-grid {
+    grid-template-columns: 1fr;
+  }
+}
