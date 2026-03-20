@@ -1,13 +1,63 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { supabase } from '../../lib/supabase';
 import './Login.css';
 
 const Login = () => {
   const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const handleAuth = (e) => {
+  const handleAuth = async (e) => {
     e.preventDefault();
-    navigate('/dashboard');
+    setLoading(true);
+    setError(null);
+
+    try {
+      // 1. Verificar se o e-mail existe na tabela students e não está bloqueado
+      const { data: student, error: studentError } = await supabase
+        .from('students')
+        .select('status')
+        .eq('email', email)
+        .single();
+
+      if (studentError || !student) {
+        setError('Este e-mail não está cadastrado em nossa base de alunos.');
+        setLoading(false);
+        return;
+      }
+
+      if (student.status === 'blocked' || student.status === 'inactive') {
+        setError('Seu acesso está temporariamente suspenso. Entre em contato com o suporte.');
+        setLoading(false);
+        return;
+      }
+
+      // 2. Tentar fazer o login oficial com o Supabase Auth
+      const { error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (authError) {
+        if (authError.message === 'Invalid login credentials') {
+          setError('Sua chave de segurança (senha) está incorreta.');
+        } else {
+          setError(authError.message);
+        }
+        setLoading(false);
+        return;
+      }
+
+      // Sucesso!
+      navigate('/dashboard');
+    } catch (err) {
+      setError('Ocorreu um erro inesperado. Tente novamente mais tarde.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -41,7 +91,13 @@ const Login = () => {
             <label>ACESSO IDENTIFICADO</label>
           </div>
           <div className="input-group">
-            <input type="email" placeholder="seu@email.com" />
+            <input 
+              type="email" 
+              placeholder="seu@email.com" 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
           </div>
 
           <div className="form-head">
@@ -49,18 +105,28 @@ const Login = () => {
             <a href="#" className="forgot-link">ESQUECI SENHA</a>
           </div>
           <div className="input-group password-group">
-            <input type="password" placeholder="••••••••" />
-            <button className="view-password">
+            <input 
+              type="password" 
+              placeholder="••••••••" 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <button className="view-password" type="button">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
             </button>
           </div>
 
-          <button className="auth-button" onClick={handleAuth}>
-            ENTRAR
+          {error && <div className="login-error-message">{error}</div>}
+
+          <button 
+            className={`auth-button ${loading ? 'loading' : ''}`} 
+            onClick={handleAuth}
+            disabled={loading}
+          >
+            {loading ? 'PROCESSANDO...' : 'ENTRAR'}
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M13.8 12H3"></path></svg>
           </button>
-
-
         </div>
       </div>
 

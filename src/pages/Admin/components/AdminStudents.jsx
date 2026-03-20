@@ -7,6 +7,9 @@ const AdminStudents = () => {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedStudent, setSelectedStudent] = useState(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newStudent, setNewStudent] = useState({ name: '', email: '', phone: '' });
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     fetchStudents();
@@ -36,9 +39,29 @@ const AdminStudents = () => {
           <h2>Central de Alunos</h2>
           <p className="text-muted">Visualize a carteira completa de alunos, seus progressos e dados avançados.</p>
         </div>
-        <div className="search-bar glass" style={{ display: 'flex', alignItems: 'center', padding: '0.5rem 1rem', borderRadius: '50px', gap: '10px' }}>
-           <Search size={18} color="#666" />
-           <input type="text" placeholder="Buscar aluno por nome..." style={{ background: 'transparent', border: 'none', color: '#fff', outline: 'none' }} />
+        <div style={{ display: 'flex', gap: '15px' }}>
+          <div className="search-bar glass" style={{ display: 'flex', alignItems: 'center', padding: '0.5rem 1rem', borderRadius: '50px', gap: '10px' }}>
+             <Search size={18} color="#666" />
+             <input type="text" placeholder="Buscar aluno por nome..." style={{ background: 'transparent', border: 'none', color: '#fff', outline: 'none' }} />
+          </div>
+          <button 
+            className="btn-add-student" 
+            onClick={() => setShowAddModal(true)}
+            style={{ 
+              background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
+              border: 'none',
+              borderRadius: '50px',
+              color: 'white',
+              padding: '0.5rem 1.5rem',
+              fontWeight: '600',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+          >
+            <Users size={18} /> Novo Aluno
+          </button>
         </div>
       </div>
       
@@ -145,6 +168,66 @@ const AdminStudents = () => {
                   </p>
                </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Adicionar Novo Aluno */}
+      {showAddModal && (
+        <div className="admin-modal-overlay" onClick={() => setShowAddModal(false)}>
+          <div className="admin-modal-content glass" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Cadastrar Novo Aluno</h3>
+              <button className="btn-close" onClick={() => setShowAddModal(false)}><X size={20}/></button>
+            </div>
+            <form className="admin-form" onSubmit={async (e) => {
+              e.preventDefault();
+              setSaving(true);
+              try {
+                const { error } = await supabase.from('students').insert([newStudent]);
+                if (error) throw error;
+                setShowAddModal(false);
+                setNewStudent({ name: '', email: '', phone: '' });
+                fetchStudents();
+              } catch (err) {
+                alert('Erro ao cadastrar aluno: ' + err.message);
+              } finally {
+                setSaving(false);
+              }
+            }}>
+              <div className="form-group">
+                <label>Nome Completo</label>
+                <input 
+                  type="text" 
+                  value={newStudent.name} 
+                  onChange={e => setNewStudent({...newStudent, name: e.target.value})} 
+                  required 
+                />
+              </div>
+              <div className="form-group">
+                <label>E-mail (Acesso)</label>
+                <input 
+                  type="email" 
+                  value={newStudent.email} 
+                  onChange={e => setNewStudent({...newStudent, email: e.target.value})} 
+                  required 
+                />
+              </div>
+              <div className="form-group">
+                <label>WhatsApp / Telefone</label>
+                <input 
+                  type="text" 
+                  value={newStudent.phone} 
+                  onChange={e => setNewStudent({...newStudent, phone: e.target.value})} 
+                />
+              </div>
+              <div className="modal-actions">
+                <button type="button" className="btn-secondary" onClick={() => setShowAddModal(false)}>Cancelar</button>
+                <button type="submit" className="btn-primary" disabled={saving}>
+                  {saving ? 'Cadastrando...' : 'Salvar Aluno'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
