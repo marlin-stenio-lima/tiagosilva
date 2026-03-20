@@ -20,7 +20,7 @@ const ScrollToTop = () => {
 
 function App() {
   return (
-    <Router basename={import.meta.env.BASE_URL}>
+    <Router basename={import.meta.env.MODE === 'production' && !window.location.hostname.includes('vercel.app') ? '/tiagosilva/' : '/'}>
       <ScrollToTop />
       <div className="app-container">
         <Routes>
