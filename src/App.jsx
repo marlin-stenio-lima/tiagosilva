@@ -20,7 +20,7 @@ const ScrollToTop = () => {
 
 function App() {
   return (
-    <Router>
+    <Router basename={import.meta.env.BASE_URL}>
       <ScrollToTop />
       <div className="app-container">
         <Routes>
@@ -30,7 +30,7 @@ function App() {
           <Route path="/courses" element={<Courses />} />
           <Route path="/tools" element={<Tools />} />
           <Route path="/diagnosis" element={<DiagnosisView />} />
-          <Route path="/lesson" element={<LessonView />} />
+          <Route path="/lesson/:lessonId" element={<LessonView />} />
           <Route path="/admin" element={<Admin />} />
         </Routes>
       </div>

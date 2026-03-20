@@ -1,63 +1,72 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
-import { Search, Play, CheckCircle, Sparkles, Layout } from 'lucide-react';
+import { Search, Play, CheckCircle, Sparkles, Layout, Loader2 } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
 import './Courses.css';
 
 const Courses = () => {
   const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState('Tudo');
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const categories = ['Tudo', 'Estratégia de IA', 'Prompt Engineering', 'Automação', 'Valuation & IA'];
 
-  const modules = [
-    {
-      id: 1,
-      title: 'N8N',
-      subtitle: 'Agentes de IA',
-      category: 'Automação',
-      icon: <Sparkles size={20} />
-    },
-    {
-      id: 2,
-      title: 'RAG',
-      subtitle: 'Banco de dados',
-      category: 'Estratégia de IA',
-      icon: <Sparkles size={20} />
-    },
-    {
-      id: 3,
-      title: 'Vendas',
-      subtitle: 'Processo comercial',
-      category: 'Estratégia de IA',
-      icon: <Sparkles size={20} />
-    },
-    {
-      id: 4,
-      title: 'Vibe Coding',
-      subtitle: 'Criação de ferramentas',
-      category: 'Prompt Engineering',
-      icon: <Sparkles size={20} />
-    },
-    {
-      id: 5,
-      title: 'Chatwoot',
-      subtitle: 'Atendimento IA',
-      category: 'Automação',
-      icon: <Sparkles size={20} />
-    },
-    {
-      id: 6,
-      title: 'Business IA',
-      subtitle: 'com Pedro Goiozo',
-      category: 'Valuation & IA',
-      icon: <Sparkles size={20} />
+  useEffect(() => {
+    fetchCourses();
+  }, []);
+
+  const fetchCourses = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('courses')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setCourses(data || []);
+    } catch (err) {
+      console.error('Erro ao buscar cursos:', err);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
   const filteredModules = activeCategory === 'Tudo' 
-    ? modules 
-    : modules.filter(m => m.category === activeCategory);
+    ? courses 
+    : courses.filter(c => c.category === activeCategory);
+
+  const handleCourseClick = async (courseId) => {
+    // Busca a primeira aula desse curso para navegar
+    try {
+      const { data: modules } = await supabase
+        .from('course_modules')
+        .select('id')
+        .eq('course_id', courseId)
+        .order('order_index', { ascending: true })
+        .limit(1);
+
+      if (modules && modules.length > 0) {
+        const { data: lessons } = await supabase
+          .from('lessons')
+          .select('id')
+          .eq('module_id', modules[0].id)
+          .order('order_index', { ascending: true })
+          .limit(1);
+
+        if (lessons && lessons.length > 0) {
+          navigate(`/lesson/${lessons[0].id}`);
+        } else {
+          alert('Este curso ainda não possui aulas.');
+        }
+      } else {
+        alert('Este curso ainda não possui módulos.');
+      }
+    } catch (err) {
+      console.error('Erro ao buscar aulas do curso:', err);
+    }
+  };
 
   return (
     <div className="dashboard-container">
@@ -69,14 +78,15 @@ const Courses = () => {
             <span className="separator">/</span>
             <span className="current">Cursos</span>
           </div>
-          <div className="header-title-row">
-            <h1>Todos os Módulos</h1>
-            <div className="view-controls">
-               <button className="view-btn active"><Layout size={18} /></button>
-               <button className="view-btn"><Layout size={18} style={{transform: 'rotate(90deg)'}} /></button>
-            </div>
-          </div>
         </header>
+
+        <div className="header-title-row">
+          <h1>Todos os Módulos</h1>
+          <div className="view-controls">
+             <button className="view-btn active"><Layout size={18} /></button>
+             <button className="view-btn"><Layout size={18} style={{transform: 'rotate(90deg)'}} /></button>
+          </div>
+        </div>
 
         <section className="search-filter-section glass">
           <div className="filter-chips">
@@ -92,21 +102,35 @@ const Courses = () => {
           </div>
         </section>
 
-        <section className="modules-vertical-grid animate-fade-in">
-          {filteredModules.map(mod => (
-            <div key={mod.id} className="module-card-vertical" onClick={() => navigate('/lesson')}>
-              <div className="module-bg-overlay"></div>
-              <div className="module-icon-top">
-                {mod.icon}
+        {loading ? (
+          <div className="loading-state">
+            <Loader2 className="animate-spin" size={48} color="#3b82f6" />
+            <p>Carregando sua biblioteca...</p>
+          </div>
+        ) : (
+          <section className="modules-vertical-grid animate-fade-in">
+            {filteredModules.length === 0 ? (
+              <div className="empty-state-courses">
+                <Search size={48} color="#555" />
+                <p>Nenhum módulo encontrado nesta categoria.</p>
               </div>
-              <div className="module-content-center">
-                <h2>{mod.title}</h2>
-                <p>{mod.subtitle}</p>
-              </div>
-              <div className="module-footer-shine"></div>
-            </div>
-          ))}
-        </section>
+            ) : (
+              filteredModules.map(c => (
+                <div key={c.id} className="module-card-vertical" onClick={() => handleCourseClick(c.id)}>
+                  <div className="module-bg-overlay"></div>
+                  <div className="module-icon-top">
+                    <Sparkles size={20} />
+                  </div>
+                  <div className="module-content-center">
+                    <h2>{c.name}</h2>
+                    <p>{c.description || 'Acesse o conteúdo deste treinamento'}</p>
+                  </div>
+                  <div className="module-footer-shine"></div>
+                </div>
+              ))
+            )}
+          </section>
+        )}
       </main>
     </div>
   );

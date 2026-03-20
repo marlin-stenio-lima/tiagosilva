@@ -1,31 +1,79 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Star, Check, CheckCheck, Circle, Layout, RotateCcw, Play, MessageSquare, Send, HelpCircle, Volume2, Maximize, ChevronDown, Plus, Info, FileText, Bold, Italic, Underline, List, Link as LinkIcon, Image as ImageIcon, Quote } from 'lucide-react';
+import { Link, useParams, useNavigate } from 'react-router-dom';
+import { ChevronLeft, ChevronRight, Star, Check, CheckCheck, Circle, Layout, RotateCcw, Play, MessageSquare, Send, HelpCircle, Volume2, Maximize, ChevronDown, Plus, Info, FileText, Loader2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import './LessonView.css';
 
 const LessonView = () => {
+  const { lessonId } = useParams();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('sobre');
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [isCompleted, setIsCompleted] = useState(false);
   
+  const [lesson, setLesson] = useState(null);
+  const [moduleLessons, setModuleLessons] = useState([]);
+  const [loading, setLoading] = useState(true);
+  
   const [commentText, setCommentText] = useState('');
   const [commentsList, setCommentsList] = useState([]);
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
 
-  const lessonIdContext = 'Módulo: Agentes de IA - Aula 01';
-
   useEffect(() => {
-    fetchApprovedComments();
-  }, []);
+    if (lessonId) {
+      fetchLessonDetails();
+      fetchApprovedComments();
+    }
+  }, [lessonId]);
+
+  const fetchLessonDetails = async () => {
+    setLoading(true);
+    try {
+      const { data: lessonData, error } = await supabase
+        .from('lessons')
+        .select(`
+          *,
+          module:course_modules(*)
+        `)
+        .eq('id', lessonId)
+        .single();
+
+      if (error) throw error;
+      setLesson(lessonData);
+
+      // Fetch other lessons in the same module
+      const { data: siblingLessons } = await supabase
+        .from('lessons')
+        .select('*')
+        .eq('module_id', lessonData.module_id)
+        .order('order_index', { ascending: true });
+
+      setModuleLessons(siblingLessons || []);
+
+      // Check if completed
+      const { data: progress } = await supabase
+        .from('lesson_progress')
+        .select('*')
+        .eq('lesson_id', lessonId)
+        .eq('status', 'completed')
+        .limit(1);
+      
+      setIsCompleted(progress && progress.length > 0);
+
+    } catch (err) {
+      console.error('Erro ao buscar detalhes da aula:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchApprovedComments = async () => {
     try {
       const { data, error } = await supabase
         .from('lesson_comments')
         .select('*')
-        .eq('lesson_id', lessonIdContext)
+        .eq('lesson_id', lessonId)
         .in('status', ['approved', 'replied'])
         .order('created_at', { ascending: false });
 
@@ -37,12 +85,30 @@ const LessonView = () => {
     }
   };
 
+  const handleLessonToggle = async () => {
+    const newStatus = !isCompleted;
+    setIsCompleted(newStatus);
+
+    try {
+      if (newStatus) {
+        await supabase.from('lesson_progress').insert([
+          { lesson_id: lessonId, status: 'completed' }
+        ]);
+      } else {
+        await supabase.from('lesson_progress').delete()
+          .eq('lesson_id', lessonId);
+      }
+    } catch (err) {
+      console.error('Erro ao atualizar progresso:', err);
+    }
+  };
+
   const handleSendComment = async () => {
     if (!commentText.trim()) return;
     setIsSubmittingComment(true);
 
     const newCommentPayload = {
-      lesson_id: lessonIdContext,
+      lesson_id: lessonId,
       student_name: 'Usuário Teste',
       student_avatar: 'UT',
       content: commentText,
@@ -53,7 +119,6 @@ const LessonView = () => {
       const { error } = await supabase.from('lesson_comments').insert([newCommentPayload]);
       if (error) throw error;
       
-      // Optimistic update locally
       setCommentsList([ { ...newCommentPayload, id: Date.now(), created_at: new Date().toISOString() }, ...commentsList ]);
       setCommentText('');
     } catch (err) {
@@ -63,6 +128,28 @@ const LessonView = () => {
       setIsSubmittingComment(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="loading-container-full">
+        <Loader2 className="animate-spin" size={48} color="#3b82f6" />
+        <p>Preparando sua aula...</p>
+      </div>
+    );
+  }
+
+  if (!lesson) {
+    return (
+      <div className="error-container-full">
+        <h3>Aula não encontrada</h3>
+        <Link to="/courses" className="btn-primary">Voltar aos Cursos</Link>
+      </div>
+    );
+  }
+
+  const currentIndex = moduleLessons.findIndex(l => l.id === lessonId);
+  const prevLesson = currentIndex > 0 ? moduleLessons[currentIndex - 1] : null;
+  const nextLesson = currentIndex < moduleLessons.length - 1 ? moduleLessons[currentIndex + 1] : null;
 
   return (
     <div className="classroom-wrapper">
@@ -91,20 +178,32 @@ const LessonView = () => {
            
            <button 
              className={`btn-aula-concluida ${isCompleted ? 'active' : ''}`}
-             onClick={() => setIsCompleted(!isCompleted)}
+             onClick={handleLessonToggle}
            >
              <Check size={16} /> {isCompleted ? 'Aula concluída' : 'Marcar concluída'}
            </button>
            
            <div className="nav-arrows">
-             <button className="nav-text-btn"><ChevronLeft size={16} /> Anterior</button>
-             <button className="nav-text-btn">Próximo <ChevronRight size={16} /></button>
+             <button 
+               className="nav-text-btn" 
+               disabled={!prevLesson}
+               onClick={() => navigate(`/lesson/${prevLesson.id}`)}
+             >
+               <ChevronLeft size={16} /> Anterior
+             </button>
+             <button 
+               className="nav-text-btn"
+               disabled={!nextLesson}
+               onClick={() => navigate(`/lesson/${nextLesson.id}`)}
+             >
+               Próximo <ChevronRight size={16} />
+             </button>
            </div>
         </div>
 
         <div className="top-right">
            <button className="btn-ver-modulos">
-             <Layout size={16} /> Ver Módulos
+             <Layout size={16} /> {lesson.module?.name || 'Módulo'}
            </button>
         </div>
       </header>
@@ -112,27 +211,20 @@ const LessonView = () => {
       <main className="classroom-layout">
         <div className="main-content-area">
           <div className="video-container-wrapper">
-
             <div className="video-player-professional glass">
-              <div className="video-mockup-bg"></div>
-              <div className="custom-player-controls">
-                <div className="p-left">
-                  <Play size={18} fill="#fff" style={{cursor:'pointer'}} />
-                  <Volume2 size={18} style={{cursor:'pointer'}} />
-                  <span className="time-display">02:14 / 15:40</span>
+              {lesson.video_url ? (
+                <iframe 
+                  src={lesson.video_url.includes('preview') ? lesson.video_url : `${lesson.video_url}?autoplay=0`}
+                  className="lesson-iframe"
+                  allowFullScreen
+                  title={lesson.title}
+                ></iframe>
+              ) : (
+                <div className="no-video-placeholder">
+                  <Play size={48} color="#333" />
+                  <p>Vídeo não disponível</p>
                 </div>
-                <div className="p-center">
-                   <div className="p-bar"><div className="p-fill" style={{width: '35%'}}></div></div>
-                </div>
-                <div className="p-right">
-                  <div className="autoplay-toggle">
-                     <span className="autoplay-label">Autoplay</span>
-                     <div className="toggle-switch active"></div>
-                  </div>
-                  <Layout size={18} style={{cursor:'pointer', marginLeft:'12px'}} />
-                  <Maximize size={18} style={{cursor:'pointer'}} />
-                </div>
-              </div>
+              )}
             </div>
           </div>
 
@@ -154,8 +246,9 @@ const LessonView = () => {
           <div className="tab-container-content animate-fade-in">
             {activeTab === 'sobre' ? (
               <section className="about-lesson-section">
+                <h2 className="lesson-main-title">{lesson.title}</h2>
                 <div className="lesson-description-text">
-                  <p>Nesta aula avançada, mergulhamos no universo da arquitetura de agentes autônomos utilizando N8N. Você vai aprender a estruturar cadeias de decisão complexas e como integrar múltiplas ferramentas para criar soluções empresariais robustas.</p>
+                  <p>{lesson.description || 'Nenhuma descrição fornecida para esta aula.'}</p>
                 </div>
               </section>
             ) : (
@@ -224,7 +317,6 @@ const LessonView = () => {
                    </div>
                  </div>
                ))}
-               {commentsList.length > 0 && <button className="btn-load-more">↓ Carregar mais</button>}
              </div>
           </section>
         </div>
@@ -239,7 +331,7 @@ const LessonView = () => {
               </svg>
             </div>
             <div className="progress-text">
-               <h4>Agentes de IA Avançados no N8N</h4>
+               <h4>{lesson.module?.name || 'Aulas'}</h4>
                <ChevronDown size={18} color="#666" />
             </div>
           </div>
@@ -249,30 +341,17 @@ const LessonView = () => {
           </div>
 
           <div className="lesson-list-scroll">
-             {[
-               "01. Agentes de IA mais lucrativos",
-               "02. AI Nodes",
-               "03. Análise de sentimento",
-               "04. Extrator de informações",
-               "05. Introdução aos AI Agents do N8N",
-               "06. Tools Agent",
-             ].map((lesson, idx) => (
-               <div key={idx} className={`lesson-list-item ${idx === 0 ? 'active' : ''}`}>
-                 <span className="lesson-check">
-                    {(idx === 0 && !isCompleted) ? <Circle size={14} color="#666" /> : <CheckCheck size={16} color="#22c55e" />}
-                 </span>
-                 <span className="lesson-title-text">{lesson}</span>
-               </div>
-             ))}
-             {[
-               "07. Tools Agent com múltiplas tools",
-               "08. Conversational Agent",
-               "09. Memória das conversas com Postgres",
-             ].map((lesson, idx) => (
-               <div key={idx + 6} className="lesson-list-item">
-                 <span className="lesson-check"><Circle size={14} color="#666" /></span>
-                 <span className="lesson-title-text">{lesson}</span>
-               </div>
+             {moduleLessons.map((l, idx) => (
+                <div 
+                  key={l.id} 
+                  className={`lesson-list-item ${l.id === lessonId ? 'active' : ''}`}
+                  onClick={() => navigate(`/lesson/${l.id}`)}
+                >
+                  <span className="lesson-check">
+                     {l.id === lessonId ? <Play size={14} color="#3b82f6" /> : <Circle size={14} color="#666" />}
+                  </span>
+                  <span className="lesson-title-text">{String(idx + 1).padStart(2, '0')}. {l.title}</span>
+                </div>
              ))}
           </div>
 

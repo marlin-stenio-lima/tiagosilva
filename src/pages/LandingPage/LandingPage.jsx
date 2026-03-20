@@ -7,6 +7,8 @@ import './LandingPage.css';
 const LandingPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const [videoUrl, setVideoUrl] = useState("https://docs.google.com/file/d/1CgH-By9Z7HIyVRoN29AYUIwy_ZQ5jb82/preview");
+
   useEffect(() => {
     const observerOptions = {
       root: null,
@@ -18,6 +20,11 @@ const LandingPage = () => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           entry.target.classList.add('is-visible');
+          
+          // Auto-play video when it enters viewport
+          if (entry.target.classList.contains('lp-video-section')) {
+            setVideoUrl("https://docs.google.com/file/d/1CgH-By9Z7HIyVRoN29AYUIwy_ZQ5jb82/preview?autoplay=1&mute=1");
+          }
         }
       });
     }, observerOptions);
@@ -36,19 +43,28 @@ const LandingPage = () => {
           <div className="hero-overlay"></div>
           <div className="hero-content animate-fade-in">
             <span className="hero-badge">IA GENERATIVA PARA DECISORES E EXECUTIVOS</span>
-            <h1>Injete <span>Inteligência Prática</span> no core operacional da sua empresa.</h1>
+            <h1 className="hero-title-main">
+              Injete <span className="typewriter-container">
+                <span className="typewriter-ghost" aria-hidden="true">Inteligência</span>
+                <span className="typewriter typewriter-animated">Inteligência</span>
+              </span><br/>
+              no core operacional da<br/>
+              sua empresa.
+            </h1>
             <p>Não vendemos ferramentas. Entregamos a arquitetura capaz de reduzir drasticamente o erro humano e escalar resultados com equipes enxutas.</p>
             <div className="hero-actions">
               <button className="btn-primary" onClick={() => setIsModalOpen(true)}>Solicitar Diagnóstico Estratégico <span>→</span></button>
-              <Link to="/login" className="btn-secondary">Acesso Exclusivo</Link>
+              <Link to="/login" className="btn-secondary">Entrar</Link>
             </div>
           </div>
 
-          <div className="scroll-indicator" onClick={() => document.getElementById('anota-ai')?.scrollIntoView({ behavior: 'smooth' })}>
+          <div className="scroll-indicator hero-scroll-fix" onClick={() => document.getElementById('anota-ai')?.scrollIntoView({ behavior: 'smooth' })}>
             <span className="scroll-text">Descubra</span>
             <div className="scroll-line"></div>
           </div>
         </section>
+
+
 
         {/* Infinite Authority Marquee - High Ticket Style */}
         <section className="authority-marquee">
@@ -135,6 +151,11 @@ const LandingPage = () => {
               </div>
             </div>
           </div>
+          <div className="center reveal-on-scroll" style={{ marginTop: '3rem' }}>
+            <button className="btn-primary" onClick={() => setIsModalOpen(true)}>
+              Solicitar Diagnóstico de IA <span>→</span>
+            </button>
+          </div>
         </section>
 
         {/* Training Models - Multi-layered Solution */}
@@ -161,15 +182,20 @@ const LandingPage = () => {
                  <h4>Masterclasses</h4>
                  <p>Mentorias de alta performance para CEOs e Donos de Negócios (Equity & Valuation).</p>
                  <span className="client-list">SME, Jornada Equity, Leaders</span>
-              </div>
-           </div>
+               </div>
+            </div>
+            <div className="center reveal-on-scroll" style={{ marginTop: '3rem' }}>
+              <button className="btn-primary" onClick={() => setIsModalOpen(true)}>
+                Ver Disponibilidade de Agenda <span>→</span>
+              </button>
+            </div>
         </section>
 
         {/* Biography Section - Personalized */}
         <section className="biography-section" id="biografia">
           <div className="bio-container glass reveal-on-scroll">
             <div className="bio-image-wrapper">
-              <img src="/imagem-thiago-biografia.jpeg" alt="Thiago Silva" className="bio-img" />
+              <img src="/foto-3.jpeg" alt="Thiago Silva" className="bio-img" />
               <div className="bio-glow"></div>
             </div>
             <div className="bio-text-content">
@@ -184,12 +210,31 @@ const LandingPage = () => {
               <p className="bio-paragraph">
                 Seu portfólio inclui participações em eventos de escala nacional (Growth Expo, Seis & Seis Expo) e uma rede de relacionamento que dita as tendências da Nova Economia. Thiago entrega o **"Como Fazer"**, não apenas o "O que é".
               </p>
+              <button className="btn-primary" onClick={() => setIsModalOpen(true)} style={{ marginTop: '1.5rem' }}>
+                Falar com Thiago Silva <span>→</span>
+              </button>
             </div>
           </div>
         </section>
 
+        {/* Video Presentation Section */}
+        <section className="lp-video-section reveal-on-scroll">
+          <div className="section-title center">
+            <span className="subtitle">Demonstração Prática</span>
+            <h2>IA em <span>Ação</span></h2>
+            <p>Veja como transformamos processos complexos em fluxos automatizados e inteligentes.</p>
+          </div>
+          <div className="video-wrapper glass">
+            <iframe 
+              src={videoUrl} 
+              allow="autoplay" 
+              title="Apresentação Thiago Silva IA"
+            ></iframe>
+          </div>
+        </section>
+
         {/* Final CTA - Professional Diagnosis */}
-        <section className="final-cta-section card-gradient reveal-on-scroll">
+        <section className="final-cta-section reveal-on-scroll">
           <div className="final-cta-content center">
             <h2>Maturidade Tecnológica</h2>
             <p>Seu negócio está gerando dados ou apenas ruído? Aplique para o Diagnóstico de Inteligência Operacional.</p>

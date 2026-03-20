@@ -1,11 +1,19 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
-import { Play, PenTool, BarChart2, Bell, ChevronRight, ExternalLink } from 'lucide-react';
+import { Play, PenTool, BarChart2, Bell, ChevronRight, Target, TrendingUp, Zap, Shield } from 'lucide-react';
 import './Dashboard.css';
+import '../Diagnosis/DiagnosisView.css';
 
 const Dashboard = () => {
   const navigate = useNavigate();
+
+  const metrics = [
+    { name: 'Nível de Automação', score: 85, icon: <Zap size={20} /> },
+    { name: 'Cultura de IA', score: 40, icon: <Target size={20} /> },
+    { name: 'Eficiência Operacional', score: 70, icon: <TrendingUp size={20} /> },
+    { name: 'Escalabilidade', score: 60, icon: <Shield size={20} /> }
+  ];
 
   return (
     <div className="dashboard-container">
@@ -28,20 +36,52 @@ const Dashboard = () => {
           </div>
         </header>
 
-        <section className="progress-section animate-fade-in">
-          <div className="progress-card card-gradient">
-            <div className="progress-info">
-              <h2>Sua jornada de IA</h2>
-              <p>Progresso contínuo nos módulos de especialização</p>
-              
-              <div className="progress-bar-container">
-                <div className="progress-bar" style={{width: '30%'}}></div>
+        <section className="featured-section" style={{ marginTop: 0 }}>
+          <div className="section-header">
+            <h3>Sua jornada de IA</h3>
+            <button onClick={() => navigate('/diagnosis')} className="view-all" style={{background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit'}}>VER DIAGNÓSTICO COMPLETO</button>
+          </div>
+          
+          <div className="diagnosis-hero glass gold-border animate-fade-in" style={{ marginTop: '1rem' }}>
+            <div className="score-main">
+               <div className="score-circle">
+                  <span className="score-number">75</span>
+                  <span className="score-total">/100</span>
+               </div>
+               <div className="score-text">
+                  <h2>Nível Alpha</h2>
+                  <p>Sua empresa está acima da média de mercado em infraestrutura de IA, mas possui gargalos na cultura de inovação interna.</p>
+               </div>
+            </div>
+            <div className="radar-placeholder glass">
+               <div className="radar-mock">
+                 <div className="radar-line"></div>
+                 <div className="radar-line"></div>
+                 <div className="radar-line"></div>
+                 <div className="radar-area"></div>
+                 <span className="label top">Automação</span>
+                 <span className="label right">Escala</span>
+                 <span className="label bottom">Eficiência</span>
+                 <span className="label left">Cultura</span>
+               </div>
+            </div>
+          </div>
+
+          <div className="metrics-grid" style={{ marginTop: '1.5rem', marginBottom: '2rem' }}>
+            {metrics.map(m => (
+              <div key={m.name} className="metric-card glass">
+                <div className="metric-header">
+                  <div className="m-icon gold-glow">{m.icon}</div>
+                  <h4>{m.name}</h4>
+                </div>
+                <div className="m-progress-bar">
+                  <div className="m-progress-fill" style={{ width: `${m.score}%` }}></div>
+                </div>
+                <div style={{display: 'flex', justifyContent: 'space-between', marginTop: '0.8rem'}}>
+                  <span className="m-score-tag" style={{position: 'static'}}>{m.score}%</span>
+                </div>
               </div>
-            </div>
-            <div className="progress-stats">
-              <span className="percentage">30%</span>
-              <span className="label">CONCLUÍDO</span>
-            </div>
+            ))}
           </div>
         </section>
 
@@ -89,41 +129,6 @@ const Dashboard = () => {
           </div>
         </section>
 
-        <section className="featured-section">
-          <div className="section-header">
-            <h3>Ferramentas em destaque</h3>
-            <a href="#" className="view-all">VER TODAS</a>
-          </div>
-          <div className="tool-grid">
-            <div className="tool-card glass">
-              <div className="tool-visual">
-                <img src="https://cdn-icons-png.flaticon.com/512/2103/2103633.png" alt="Tool" />
-              </div>
-              <div className="tool-info">
-                <h4>Auto-GPT Master</h4>
-                <p>Automação completa de tarefas complexas</p>
-                <span className="tool-tag tag-blue">PRODUTIVIDADE</span>
-              </div>
-              <button className="tool-action">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"></path></svg>
-              </button>
-            </div>
-
-            <div className="tool-card glass">
-              <div className="tool-visual">
-                <img src="https://cdn-icons-png.flaticon.com/512/4712/4712139.png" alt="Tool" />
-              </div>
-              <div className="tool-info">
-                <h4>Claude 3 Opus Helper</h4>
-                <p>Templates para análise de dados e documentos</p>
-                <span className="tool-tag tag-cyan">ANÁLISE</span>
-              </div>
-              <button className="tool-action">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"></path></svg>
-              </button>
-            </div>
-          </div>
-        </section>
       </main>
     </div>
   );

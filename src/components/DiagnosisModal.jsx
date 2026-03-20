@@ -103,7 +103,7 @@ const DiagnosisModal = ({ isOpen, onClose }) => {
     
     try {
       // Get Webhook URL from localStorage or use a fallback
-      const webhookUrl = localStorage.getItem('n8nWebhookUrl') || 'https://hook.us1.make.com/mock-url-antigravity';
+      const webhookUrl = localStorage.getItem('n8nWebhookUrl') || 'https://hook.us1.make.com/mock-url-thiago-ia';
       
       const payload = {
         timestamp: new Date().toISOString(),

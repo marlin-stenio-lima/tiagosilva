@@ -14,8 +14,7 @@ const Login = () => {
     <div className="login-container">
       <div className="login-header">
         <div className="logo">
-          <img src="/logo.png" alt="Thiago Silva IA" className="logo-icon" />
-          <span>Thiago Silva <strong>IA</strong></span>
+          {/* Nome e logo removidos conforme solicitado */}
         </div>
         <Link to="/" className="back-link">VOLTAR AO SITE</Link>
       </div>
@@ -66,7 +65,7 @@ const Login = () => {
       </div>
 
       <div className="login-footer">
-        SEM AUTORIZAÇÃO? <a href="#">CONSULTAR THIAGO</a>
+        SEM AUTORIZAÇÃO? <Link to="/">SOLICITAR DIAGNÓSTICO</Link>
       </div>
     </div>
   );

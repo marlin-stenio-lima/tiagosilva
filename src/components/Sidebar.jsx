@@ -43,12 +43,6 @@ const Sidebar = () => {
               Ferramentas
             </NavLink>
           </li>
-          <li>
-            <NavLink to="/diagnosis" className={({ isActive }) => isActive ? 'active' : ''}>
-              <BarChart2 size={20} />
-              Diagnóstico
-            </NavLink>
-          </li>
         </ul>
       </nav>
 

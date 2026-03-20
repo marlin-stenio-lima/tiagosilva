@@ -77,49 +77,6 @@ const Tools = () => {
           </div>
         </section>
 
-        <section className="tools-directory">
-          <div className="directory-header">
-            <h3>Diretório de Recursos</h3>
-            <div className="search-mini">
-               <Search size={16} />
-               <input type="text" placeholder="Filtrar ferramentas..." />
-            </div>
-          </div>
-
-          <div className="filter-tabs">
-            {categories.map(cat => (
-              <button 
-                key={cat} 
-                className={`tab ${activeTab === cat ? 'active' : ''}`}
-                onClick={() => setActiveTab(cat)}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-
-          <div className="tools-list animate-fade-in">
-            {filteredTools.map(tool => (
-              <div key={tool.id} className="tool-list-item glass">
-                <div className="item-icon">
-                  <div className="icon-box gold-glow">
-                    {tool.name[0]}
-                  </div>
-                </div>
-                <div className="item-content">
-                  <h4>{tool.name}</h4>
-                  <p>{tool.desc}</p>
-                </div>
-                <div className="item-actions">
-                  <span className="cat-badge">{tool.cat}</span>
-                  <button className="btn-icon">
-                    <ExternalLink size={18} />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
       </main>
     </div>
   );
